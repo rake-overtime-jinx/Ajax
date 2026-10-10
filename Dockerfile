@@ -6,6 +6,7 @@ ENV XRAY_LOCATION_ASSET=/usr/local/bin/xray
 ENV PATH="/usr/local/bin/xray:${PATH}"
 ENV PYTHONUNBUFFERED=1
 
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         nginx wget unzip procps curl ca-certificates && \
     rm -rf /etc/nginx/sites-enabled/* /etc/nginx/conf.d/* && \
@@ -20,6 +21,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
 
 RUN mkdir -p /var/log/nginx /run && \
     chmod -R 777 /var/log/nginx /run /app

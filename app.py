@@ -19,6 +19,7 @@ from flask import Flask, render_template, request, jsonify, Response, redirect, 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-me-in-production-" + str(uuid.uuid4())[:8])
 
+
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "admin")
 XRAY_PORT = 10000
@@ -29,7 +30,9 @@ XRAY_CONFIG = "xray.json"
 NGINX_CONF = "nginx.conf"
 ONLINE_THRESHOLD = 90
 
+
 WS_PATH = "/cdn/assets"
+
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -74,6 +77,7 @@ def update_proxy(**kwargs):
     conn.commit()
     conn.close()
 
+
 def is_active(p):
     if not p or p["enabled"] == 0:
         return False, "disabled"
@@ -109,6 +113,7 @@ def enrich(p):
         "is_online": (time.time() - ONLINE.get("last", 0)) < ONLINE_THRESHOLD
     })
     return p
+
 
 ONLINE = {"last": 0}
 
@@ -305,6 +310,11 @@ def require_auth():
     if "ok" not in session:
         return redirect(url_for("login"))
     return None
+
+@app.route("/ping")
+def ping():
+    """Lightweight keep-alive endpoint (no auth)."""
+    return "ok", 200
 
 @app.route("/")
 def index():
