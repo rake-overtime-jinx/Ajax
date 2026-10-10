@@ -1,0 +1,189 @@
+:root {
+  --bg: #0f1115;
+  --card: #1a1d24;
+  --border: #2a2e38;
+  --text: #e4e6eb;
+  --muted: #8b909a;
+  --accent: #4f8cff;
+  --green: #3dd68c;
+  --red: #f07178;
+  --warn: #e6b450;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+body.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+a { color: var(--accent); text-decoration: none; }
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.logo { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.5px; }
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+main.narrow { max-width: 480px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+h1, h2 { font-weight: 600; margin-bottom: 12px; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.05rem; color: var(--muted); }
+
+.muted { color: var(--muted); font-size: 0.85rem; }
+.center { text-align: center; }
+
+.row { display: flex; align-items: center; }
+.row.between { justify-content: space-between; }
+.row.gap { gap: 10px; flex-wrap: wrap; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  text-align: center;
+  margin: 14px 0;
+}
+.val { font-size: 1.35rem; font-weight: 600; }
+.lbl { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+.bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+}
+.bar > div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.badge.on { background: rgba(61,214,140,0.15); color: var(--green); }
+.badge.off { background: rgba(240,113,120,0.15); color: var(--red); }
+
+button, .btn, .btn-sm {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+button:hover, .btn:hover, .btn-sm:hover { opacity: 0.85; }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 16px;
+}
+.btn.warn { background: var(--warn); color: #111; }
+.btn-sm {
+  background: var(--border);
+  color: var(--text);
+  padding: 5px 12px;
+  font-size: 0.8rem;
+}
+
+input, textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  width: 100%;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+.login-card form { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.login-card button { margin-top: 6px; padding: 10px; }
+
+.form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+.form-inline label { font-size: 0.8rem; color: var(--muted); }
+.form-inline input { width: 90px; }
+
+.alert {
+  background: rgba(240,113,120,0.12);
+  color: var(--red);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.sub-box { margin-bottom: 14px; }
+.sub-box label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
+.copy-row { display: flex; gap: 8px; }
+.copy-row input { flex: 1; }
+
+.configs { display: flex; flex-direction: column; gap: 10px; }
+.cfg {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.cfg-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+.cfg textarea {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  resize: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+@media (max-width: 500px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="center">
+  <div class="card login-card">
+    <h1>Pablo Panel</h1>
+    <p class="muted">Single-user proxy manager</p>
+    {% if error %}
+    <div class="alert">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <input type="text" name="username" placeholder="Username" required autofocus>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+</html>

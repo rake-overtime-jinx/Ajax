@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subscription</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <main class="narrow">
+    <section class="card">
+      <h1>Subscription</h1>
+      {% if not active %}
+      <div class="alert">Service {{ reason }}</div>
+      {% else %}
+      <div class="stats">
+        <div><div class="val">{{ used_gb }}</div><div class="lbl">Used</div></div>
+        <div><div class="val">{{ quota_gb }}</div><div class="lbl">Quota</div></div>
+        <div><div class="val">{{ days_left }}</div><div class="lbl">Days</div></div>
+      </div>
+      <div class="bar"><div style="width:{{ percent }}%"></div></div>
+      {% endif %}
+    </section>
+    {% if active and configs %}
+    <section class="card">
+      <h2>Configs</h2>
+      {% for c in configs %}
+      <div class="cfg">
+        <div class="cfg-title">{{ c.title }}</div>
+        <textarea readonly rows="2">{{ c.config }}</textarea>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>

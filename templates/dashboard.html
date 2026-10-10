@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <nav>
+    <span class="logo">Pablo</span>
+    <a href="/logout" class="btn-sm">Logout</a>
+  </nav>
+
+  <main>
+    <!-- Status -->
+    <section class="card">
+      <div class="row between">
+        <h2>Status</h2>
+        <span id="badge" class="badge {{ 'on' if p.is_active else 'off' }}">
+          {{ 'Active' if p.is_active else p.reason|title }}
+        </span>
+      </div>
+      <div class="stats">
+        <div>
+          <div class="val" id="used">{{ p.used_gb }}</div>
+          <div class="lbl">Used GB</div>
+        </div>
+        <div>
+          <div class="val" id="quota">{{ p.quota_gb }}</div>
+          <div class="lbl">Quota GB</div>
+        </div>
+        <div>
+          <div class="val" id="days">{{ p.days_left }}</div>
+          <div class="lbl">Days left</div>
+        </div>
+        <div>
+          <div class="val" id="online">{{ '●' if p.is_online else '○' }}</div>
+          <div class="lbl">Online</div>
+        </div>
+      </div>
+      <div class="bar"><div id="bar" style="width:{{ p.percent }}%"></div></div>
+      <div class="muted center">{{ p.percent }}% used</div>
+    </section>
+
+    <!-- Controls -->
+    <section class="card">
+      <h2>Controls</h2>
+      <div class="row gap">
+        <button onclick="toggle()" id="btn-toggle" class="btn">
+          {{ 'Disable' if p.is_active else 'Enable' }}
+        </button>
+        <button onclick="resetTraffic()" class="btn warn">Reset Traffic</button>
+      </div>
+      <form id="form-update" class="form-inline" onsubmit="return updateSettings(event)">
+        <label>Quota (GB)</label>
+        <input type="number" id="quota_in" value="{{ p.quota_gb }}" min="1" step="1">
+        <label>Days</label>
+        <input type="number" id="days_in" value="{{ p.expire_days }}" min="1" step="1">
+        <button type="submit" class="btn">Save</button>
+      </form>
+    </section>
+
+    <!-- Configs -->
+    <section class="card">
+      <div class="row between">
+        <h2>Configs</h2>
+        <button onclick="loadConfigs()" class="btn-sm">Refresh</button>
+      </div>
+      <div id="sub-box" class="sub-box" style="display:none">
+        <label>Subscription link</label>
+        <div class="copy-row">
+          <input type="text" id="sub-url" readonly>
+          <button onclick="copy('sub-url')" class="btn-sm">Copy</button>
+        </div>
+      </div>
+      <div id="configs" class="configs"></div>
+    </section>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
