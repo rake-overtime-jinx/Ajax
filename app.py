@@ -134,54 +134,79 @@ def core_bin():
     return "xray"
 
 
-def detect_public_ip():
-    now = time.time()
-    if _IP_CACHE["ip"] and now - _IP_CACHE["ts"] < 300:
-        return _IP_CACHE["ip"]
-    sources = [
-        "https://api.ipify.org",
-        "https://ifconfig.me/ip",
-        "https://icanhazip.com",
-    ]
-    for url in sources:
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0"})
-            with urllib.request.urlopen(req, timeout=4) as r:
-                ip = r.read().decode().strip()
-                if ip and 6 < len(ip) < 46 and " " not in ip:
-                    _IP_CACHE["ip"] = ip
-                    _IP_CACHE["ts"] = now
-                    log("public address resolved")
-                    return ip
-        except Exception:
-            continue
-    return _IP_CACHE["ip"]
-
-
 def resolve_host_ip(hostname):
+    if not hostname:
+        return None
+    hostname = hostname.strip().lower()
+    hostname = hostname.replace("https://", "").replace("http://", "").split("/")[0]
+    hostname = hostname.split(":")[0]
+    if not hostname or hostname.replace(".", "").isdigit():
+        return None
     try:
-        return socket.getaddrinfo(hostname, 443, socket.AF_INET)[0][4][0]
+        infos = socket.getaddrinfo(hostname, 443, socket.AF_INET)
+        for item in infos:
+            ip = item[4][0]
+            if ip and not ip.startswith("127."):
+                return ip
     except Exception:
         return None
+    return None
 
 
-def pick_address(fallback_host):
-    ip = detect_public_ip()
-    if ip:
-        return ip
-    if fallback_host and not fallback_host.replace(".", "").isdigit():
-        resolved = resolve_host_ip(fallback_host)
-        if resolved:
-            return resolved
-    return fallback_host
+def service_hostnames(request_host=None):
+    names = []
+    if PUBLIC_HOST:
+        names.append(PUBLIC_HOST)
+    for key in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_STATIC_URL", "RAILWAY_SERVICE_DOMAIN"):
+        raw = os.environ.get(key, "").strip()
+        if not raw:
+            continue
+        raw = raw.replace("https://", "").replace("http://", "").split("/")[0]
+        if raw:
+            names.append(raw)
+    if request_host:
+        h = request_host.split(":")[0].strip().lower()
+        if h.endswith("railway.app") or h.endswith("up.railway.app"):
+            names.append(h)
+    seen = set()
+    out = []
+    for n in names:
+        n = n.strip().lower()
+        if n and n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
 
 
 def pick_sni(request_host):
-    if PUBLIC_HOST:
-        return PUBLIC_HOST
+    hosts = service_hostnames(request_host)
+    if hosts:
+        return hosts[0]
     if request_host and not request_host.replace(".", "").isdigit():
-        return request_host
+        return request_host.split(":")[0]
     return request_host or "localhost"
+
+
+def pick_address(request_host):
+    now = time.time()
+    if _IP_CACHE["ip"] and now - _IP_CACHE["ts"] < 120:
+        return _IP_CACHE["ip"]
+    for name in service_hostnames(request_host):
+        ip = resolve_host_ip(name)
+        if ip:
+            _IP_CACHE["ip"] = ip
+            _IP_CACHE["ts"] = now
+            log("ingress address ready")
+            return ip
+    if request_host:
+        h = request_host.split(":")[0]
+        if h.endswith("railway.app"):
+            ip = resolve_host_ip(h)
+            if ip:
+                _IP_CACHE["ip"] = ip
+                _IP_CACHE["ts"] = now
+                return ip
+    return _IP_CACHE["ip"] or (request_host.split(":")[0] if request_host else "127.0.0.1")
 
 
 def build_core_config():
@@ -504,7 +529,7 @@ def ping():
             "core": port_open(CORE_PORT),
             "gate": port_open(PUBLIC_PORT),
             "port": PUBLIC_PORT,
-            "addr": detect_public_ip() or "",
+            "addr": pick_address("") or "",
         }
     ), 200
 
@@ -558,7 +583,7 @@ def api_status():
             "reason": a["reason"],
             "core": port_open(CORE_PORT),
             "gate": port_open(PUBLIC_PORT),
-            "addr": detect_public_ip() or "",
+            "addr": pick_address("") or "",
         }
     )
 
@@ -631,7 +656,7 @@ def api_restart():
             "ok": True,
             "core": port_open(CORE_PORT),
             "gate": port_open(PUBLIC_PORT),
-            "addr": detect_public_ip() or "",
+            "addr": pick_address("") or "",
         }
     )
 
@@ -691,7 +716,7 @@ if __name__ == "__main__":
     init_db()
     restart_core()
     restart_gate()
-    detect_public_ip()
+    pick_address(None)
     threading.Thread(target=stats_loop, daemon=True).start()
     log(f"app on {APP_PORT}")
     app.run(host="127.0.0.1", port=APP_PORT, threaded=True)
