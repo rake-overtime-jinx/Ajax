@@ -10,7 +10,7 @@ async function refreshStatus() {
   try {
     const s = await api("/api/status");
     document.getElementById("used").textContent = s.used_gb;
-    document.getElementById("quota").textContent = s.quota_gb;
+    document.getElementById("limit").textContent = s.limit_gb;
     document.getElementById("days").textContent = s.days_left;
     document.getElementById("online").textContent = s.is_online ? "●" : "○";
     document.getElementById("bar").style.width = s.percent + "%";
@@ -18,17 +18,20 @@ async function refreshStatus() {
     badge.textContent = s.is_active ? "Active" : (s.reason || "Off");
     badge.className = "badge " + (s.is_active ? "on" : "off");
     document.getElementById("btn-toggle").textContent = s.is_active ? "Disable" : "Enable";
+    const line = document.getElementById("addr-line");
+    if (line && s.addr) line.textContent = s.addr;
   } catch (_) {}
 }
 
-async function loadConfigs() {
-  const data = await api("/api/configs");
-  const box = document.getElementById("configs");
+async function loadLinks() {
+  const data = await api("/api/links");
+  const box = document.getElementById("links");
   box.innerHTML = "";
-  document.getElementById("sub-box").style.display = "block";
-  document.getElementById("sub-url").value = data.sub;
-
-  data.configs.forEach(c => {
+  document.getElementById("feed-box").style.display = "block";
+  document.getElementById("feed-url").value = data.feed;
+  const line = document.getElementById("addr-line");
+  if (line && data.addr) line.textContent = data.addr + (data.sni ? " · " + data.sni : "");
+  data.links.forEach(c => {
     const div = document.createElement("div");
     div.className = "cfg";
     div.innerHTML = `
@@ -50,24 +53,30 @@ async function toggle() {
   refreshStatus();
 }
 
-async function resetTraffic() {
-  if (!confirm("Reset used traffic to zero?")) return;
+async function resetUsage() {
+  if (!confirm("Reset usage counters?")) return;
   await api("/api/reset", { method: "POST" });
   refreshStatus();
 }
 
-async function updateSettings(e) {
+async function restartAll() {
+  const r = await api("/api/restart", { method: "POST" });
+  alert("core=" + r.core + " gate=" + r.gate + (r.addr ? " addr=" + r.addr : ""));
+  refreshStatus();
+  loadLinks();
+}
+
+async function saveSettings(e) {
   e.preventDefault();
-  const quota = parseFloat(document.getElementById("quota_in").value);
+  const limit = parseFloat(document.getElementById("limit_in").value);
   const days = parseInt(document.getElementById("days_in").value);
   await api("/api/update", {
     method: "POST",
-    body: JSON.stringify({ quota_gb: quota, expire_days: days })
+    body: JSON.stringify({ limit_gb: limit, expire_days: days })
   });
   refreshStatus();
   return false;
 }
 
-// auto refresh every 30s
 setInterval(refreshStatus, 30000);
-loadConfigs();
+loadLinks();
