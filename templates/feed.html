@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajax Project</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <main class="narrow">
+    <section class="card">
+      <h1>Ajax Project</h1>
+      {% if not active %}
+      <div class="alert">{{ reason }}</div>
+      {% else %}
+      <div class="stats">
+        <div><div class="val">{{ used_gb }}</div><div class="lbl">Used</div></div>
+        <div><div class="val">{{ limit_gb }}</div><div class="lbl">Limit</div></div>
+        <div><div class="val">{{ days_left }}</div><div class="lbl">Days</div></div>
+      </div>
+      <div class="bar"><div style="width:{{ percent }}%"></div></div>
+      {% endif %}
+    </section>
+    {% if active and links %}
+    <section class="card">
+      <h2>Links</h2>
+      {% for c in links %}
+      <div class="cfg">
+        <div class="cfg-title">{{ c.title }}</div>
+        <textarea readonly rows="2">{{ c.config }}</textarea>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>
